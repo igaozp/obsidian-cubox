@@ -68,48 +68,36 @@ export class FolderSelectModal extends Modal {
     private createFolderList() {
         this.listEl.empty();
         
-        const allItemsSetting = new Setting(this.listEl)
-            .setName('All items');
-            
-        if (this.selectedFolders.has(ALL_FOLDERS_ID)) {
-            allItemsSetting.settingEl.addClass('is-selected');
-        }
-        
-        allItemsSetting.settingEl.addEventListener('click', () => {
-            const isCurrentlySelected = this.selectedFolders.has(ALL_FOLDERS_ID);
-            this.handleFolderToggle(ALL_FOLDERS_ID, !isCurrentlySelected);
-            this.redraw();
-        });
-        
-        // 添加每个文件夹的选项
-        this.folders.forEach(folder => {
-            const folderSetting = new Setting(this.listEl)
-                .setName(folder.nested_name);
-                
-            // 如果"All Items"被选中，禁用其他选项
-            if (this.selectedFolders.has(ALL_FOLDERS_ID)) {
-                folderSetting.settingEl.addClass('is-disabled');
-            } else {
-                // 添加选中状态的类
-                if (this.selectedFolders.has(folder.id)) {
-                    folderSetting.settingEl.addClass('is-selected');
-                }
-                
-                // 添加点击事件
-                folderSetting.settingEl.addEventListener('click', () => {
-                    const isCurrentlySelected = this.selectedFolders.has(folder.id);
-                    this.handleFolderToggle(folder.id, !isCurrentlySelected);
+        new Setting(this.listEl)
+            .setName('All items')
+            .addToggle(toggle => {
+                toggle.setValue(this.selectedFolders.has(ALL_FOLDERS_ID));
+                toggle.onChange(value => {
+                    this.handleFolderToggle(ALL_FOLDERS_ID, value);
                     this.redraw();
                 });
-            }
+            });
 
+        this.folders.forEach(folder => {
+            const allOn = this.selectedFolders.has(ALL_FOLDERS_ID);
+            const folderSetting = new Setting(this.listEl)
+                .setName(folder.nested_name)
+                .addToggle(toggle => {
+                    toggle.setDisabled(allOn);
+                    toggle.setValue(!allOn && this.selectedFolders.has(folder.id));
+                    if (!allOn) {
+                        toggle.onChange(value => {
+                            this.handleFolderToggle(folder.id, value);
+                            this.redraw();
+                        });
+                    }
+                });
+            if (allOn) {
+                folderSetting.settingEl.addClass('is-disabled');
+            }
         });
     }
     
-    private isFolderSelected(folderId: string): boolean {
-        return this.selectedFolders.has(folderId);
-    }
-
     private handleFolderToggle(folderId: string, isSelected: boolean) {
         if (folderId === ALL_FOLDERS_ID) {
             if (isSelected) {

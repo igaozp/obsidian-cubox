@@ -85,36 +85,29 @@ export class StatusSelectModal extends Modal {
         
         // 添加每个状态的选项
         this.statuses.forEach(status => {
+            const allOn = this.selectedStatuses.has(ALL_STATUS_ID);
             const statusSetting = new Setting(this.listEl)
-                .setName(status.name);
-                
-            // 如果是"All Items"选项
-            if (status.id === ALL_STATUS_ID) {
-                // 添加选中状态的类
-                if (this.selectedStatuses.has(status.id)) {
-                    statusSetting.settingEl.addClass('is-selected');
-                }
-                
-                statusSetting.settingEl.addEventListener('click', () => {
-                    const isCurrentlySelected = this.selectedStatuses.has(status.id);
-                    this.handleStatusToggle(status.id, !isCurrentlySelected);
-                    this.redraw();
-                });
-            } else {
-                // 如果"All Items"被选中，禁用其他选项
-                if (this.selectedStatuses.has(ALL_STATUS_ID)) {
-                    statusSetting.settingEl.addClass('is-disabled');
-                } else {
-                    if (this.selectedStatuses.has(status.id)) {
-                        statusSetting.settingEl.addClass('is-selected');
+                .setName(status.name)
+                .addToggle(toggle => {
+                    if (status.id === ALL_STATUS_ID) {
+                        toggle.setValue(this.selectedStatuses.has(ALL_STATUS_ID));
+                        toggle.onChange(value => {
+                            this.handleStatusToggle(ALL_STATUS_ID, value);
+                            this.redraw();
+                        });
+                    } else {
+                        toggle.setDisabled(allOn);
+                        toggle.setValue(!allOn && this.selectedStatuses.has(status.id));
+                        if (!allOn) {
+                            toggle.onChange(value => {
+                                this.handleStatusToggle(status.id, value);
+                                this.redraw();
+                            });
+                        }
                     }
-                    
-                    statusSetting.settingEl.addEventListener('click', () => {
-                        const isCurrentlySelected = this.selectedStatuses.has(status.id);
-                        this.handleStatusToggle(status.id, !isCurrentlySelected);
-                        this.redraw();
-                    });
-                }
+                });
+            if (status.id !== ALL_STATUS_ID && allOn) {
+                statusSetting.settingEl.addClass('is-disabled');
             }
         });
     }

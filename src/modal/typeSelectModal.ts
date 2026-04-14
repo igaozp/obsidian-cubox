@@ -66,20 +66,15 @@ export class TypeSelectModal extends Modal {
         
         // 添加每个类型的选项
         ALL_CONTENT_TYPES.forEach(typeId => {
-            const typeSetting = new Setting(this.listEl)
-                .setName(typeId);
-                
-            // 添加选中状态的类
-            if (this.selectedTypes.has(typeId)) {
-                typeSetting.settingEl.addClass('is-selected');
-            }
-            
-            // 添加点击事件
-            typeSetting.settingEl.addEventListener('click', () => {
-                const isCurrentlySelected = this.selectedTypes.has(typeId);
-                this.handleTypeToggle(typeId, !isCurrentlySelected);
-                this.redraw();
-            });
+            new Setting(this.listEl)
+                .setName(typeId)
+                .addToggle(toggle => {
+                    toggle.setValue(this.selectedTypes.has(typeId));
+                    toggle.onChange(value => {
+                        this.handleTypeToggle(typeId, value);
+                        this.redraw();
+                    });
+                });
         });
     }
 
