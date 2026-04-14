@@ -3,6 +3,7 @@ import { CuboxApi } from './cuboxApi';
 import { TemplateProcessor } from './templateProcessor';
 import { formatDateTime } from './utils';
 import { CuboxSyncSettingTab, CuboxSyncSettings, DEFAULT_SETTINGS } from './cuboxSetting';
+import { normalizeTypeFilterStorage } from './modal/typeSelectModal';
 
 
 export default class CuboxSyncPlugin extends Plugin {
@@ -54,6 +55,7 @@ export default class CuboxSyncPlugin extends Plugin {
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings.typeFilter = normalizeTypeFilterStorage(this.settings.typeFilter);
 	}
 
 	async saveSettings() {

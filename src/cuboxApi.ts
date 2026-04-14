@@ -2,6 +2,7 @@ import { Notice, requestUrl } from 'obsidian';
 import { ALL_FOLDERS_ID } from './modal/folderSelectModal';
 import { ALL_ITEMS } from './modal/tagSelectModal';
 import { ALL_STATUS_ID } from './modal/statusSelectModal';
+import { expandTypeFilterForApi } from './modal/typeSelectModal';
 
 export interface CuboxArticle {
     id: string; 
@@ -152,9 +153,9 @@ export class CuboxApi {
                 }
             }
             
-            // 添加类型过滤
+            // 添加类型过滤（Others 展开为 Memo/Image/Audio/Video/File）
             if (params.typeFilter && params.typeFilter.length > 0) {
-                requestBody.type_filters = params.typeFilter;
+                requestBody.type_filters = expandTypeFilterForApi(params.typeFilter);
             }
             
             // 添加状态过滤

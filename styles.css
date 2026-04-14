@@ -109,3 +109,22 @@ If your plugin does not need CSS, delete this file.
 .type-list-container .setting-item:first-child .setting-item-name {
     font-weight: normal;
 }
+
+.cubox-others-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    vertical-align: middle;
+    cursor: var(--cursor);
+    color: var(--text-muted);
+}
+
+.cubox-others-info-icon:hover {
+    color: var(--text-accent);
+}
+
+.cubox-others-info-icon svg {
+    width: 14px;
+    height: 14px;
+}
