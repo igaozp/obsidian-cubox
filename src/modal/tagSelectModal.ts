@@ -66,69 +66,52 @@ export class TagSelectModal extends Modal {
     private createTagList() {
         this.listEl.empty();
         
-        // 添加"All Items"选项
-        const allItemsSetting = new Setting(this.listEl)
-            .setName('All items');
-            
-        if (this.selectedTags.has(ALL_ITEMS)) {
-            allItemsSetting.settingEl.addClass('is-selected');
-        }
-        
-        // 添加点击事件
-        allItemsSetting.settingEl.addEventListener('click', () => {
-            const isCurrentlySelected = this.selectedTags.has(ALL_ITEMS);
-            this.handleTagToggle(ALL_ITEMS, !isCurrentlySelected);
-            this.redraw();
-        });
-        
-        // 添加"No Tags"选项
-        const noTagsSetting = new Setting(this.listEl)
-            .setName('No tags');
-            
-        // 如果"All Items"被选中，禁用其他选项
-        if (this.selectedTags.has(ALL_ITEMS)) {
-            noTagsSetting.settingEl.addClass('is-disabled');
-        } else {
-            // 添加选中状态的类
-            if (this.selectedTags.has(NO_TAGS_ID)) {
-                noTagsSetting.settingEl.addClass('is-selected');
-            }
-            
-            noTagsSetting.settingEl.addEventListener('click', () => {
-                const isCurrentlySelected = this.selectedTags.has(NO_TAGS_ID);
-                this.handleTagToggle(NO_TAGS_ID, !isCurrentlySelected);
-                this.redraw();
-            });
-        }
-        
-        // 添加每个标签的选项
-        this.tags.forEach(tag => {
-            const tagSetting = new Setting(this.listEl)
-                .setName(tag.nested_name);
-                
-            // 如果"All Items"被选中，禁用其他选项
-            if (this.selectedTags.has(ALL_ITEMS)) {
-                tagSetting.settingEl.addClass('is-disabled');
-            } else {
-                // 添加选中状态的类
-                if (this.selectedTags.has(tag.id)) {
-                    tagSetting.settingEl.addClass('is-selected');
-                }
-                
-                tagSetting.settingEl.addEventListener('click', () => {
-                    const isCurrentlySelected = this.selectedTags.has(tag.id);
-                    this.handleTagToggle(tag.id, !isCurrentlySelected);
+        new Setting(this.listEl)
+            .setName('All items')
+            .addToggle(toggle => {
+                toggle.setValue(this.selectedTags.has(ALL_ITEMS));
+                toggle.onChange(value => {
+                    this.handleTagToggle(ALL_ITEMS, value);
                     this.redraw();
                 });
+            });
+
+        const allOn = this.selectedTags.has(ALL_ITEMS);
+        const noTagsSetting = new Setting(this.listEl)
+            .setName('No tags')
+            .addToggle(toggle => {
+                toggle.setDisabled(allOn);
+                toggle.setValue(!allOn && this.selectedTags.has(NO_TAGS_ID));
+                if (!allOn) {
+                    toggle.onChange(value => {
+                        this.handleTagToggle(NO_TAGS_ID, value);
+                        this.redraw();
+                    });
+                }
+            });
+        if (allOn) {
+            noTagsSetting.settingEl.addClass('is-disabled');
+        }
+
+        this.tags.forEach(tag => {
+            const tagSetting = new Setting(this.listEl)
+                .setName(tag.nested_name)
+                .addToggle(toggle => {
+                    toggle.setDisabled(allOn);
+                    toggle.setValue(!allOn && this.selectedTags.has(tag.id));
+                    if (!allOn) {
+                        toggle.onChange(value => {
+                            this.handleTagToggle(tag.id, value);
+                            this.redraw();
+                        });
+                    }
+                });
+            if (allOn) {
+                tagSetting.settingEl.addClass('is-disabled');
             }
-            
         });
     }
     
-    private isTagSelected(tagId: string): boolean {
-        return this.selectedTags.has(tagId);
-    }
-
     private handleTagToggle(tagId: string, isSelected: boolean) {
         if (tagId === ALL_ITEMS) {
             if (isSelected) {

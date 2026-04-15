@@ -3,7 +3,7 @@ import type CuboxSyncPlugin from './main';
 import { FRONT_MATTER_VARIABLES } from './templateProcessor';
 import { ALL_FOLDERS_ID, FolderSelectModal } from './modal/folderSelectModal';
 import { filenameTemplateInstructions, metadataVariablesInstructions, contentTemplateInstructions, cuboxDateFormat, getFilenameReferenceLink, getMetadataReferenceLink, getContentReferenceLink, getDateReferenceLink, getInstructionUrl } from './templateInstructions';
-import { ALL_CONTENT_TYPES, TypeSelectModal } from './modal/typeSelectModal';
+import { isFullTypeSelection, storedTypesToModalSelection, TypeSelectModal } from './modal/typeSelectModal';
 import { ALL_STATUS_ID, StatusSelectModal } from './modal/statusSelectModal';
 import { ALL_ITEMS, TagSelectModal } from './modal/tagSelectModal';
 import { normalizePath } from 'obsidian';
@@ -266,13 +266,14 @@ export class CuboxSyncSettingTab extends PluginSettingTab {
 					// 打开类型选择模态框
 					const modal = new TypeSelectModal(
 						this.app, 
-						this.plugin.settings.typeFilter,
+						storedTypesToModalSelection(this.plugin.settings.typeFilter),
 						async (selectedTypes) => {
 							this.plugin.settings.typeFilter = selectedTypes;
 							await this.plugin.saveSettings();
 							// 更新按钮文本
 							button.setButtonText(this.getTypeFilterButtonText());
-						}
+						},
+						this.plugin.settings.domain
 					);
 					modal.open();
 				}));
@@ -489,7 +490,7 @@ export class CuboxSyncSettingTab extends PluginSettingTab {
 			textComponent.inputEl.disabled = true;
 		} else {
 			// 已选择域名，更新描述和链接
-			const url = `https://${domain}/my/settings/extensions`;
+			const url = `https://${domain}/web/settings/extensions`;
 			const descEl = this.apiKeySetting.descEl;
 			
 			// 清空现有描述
@@ -578,7 +579,7 @@ export class CuboxSyncSettingTab extends PluginSettingTab {
 		const typeFilters = this.plugin.settings.typeFilter;
 		if (!typeFilters || typeFilters.length === 0) {
 			return 'Select...';
-		} else if (typeFilters.length === ALL_CONTENT_TYPES.length) {
+		} else if (isFullTypeSelection(typeFilters)) {
 			return 'All types';
 		} else {
 			return `${typeFilters.length} selected`;
