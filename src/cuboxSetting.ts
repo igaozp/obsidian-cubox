@@ -490,7 +490,7 @@ export class CuboxSyncSettingTab extends PluginSettingTab {
 			textComponent.inputEl.disabled = true;
 		} else {
 			// 已选择域名，更新描述和链接
-			const url = `https://${domain}/my/settings/extensions`;
+			const url = `https://${domain}/web/settings/extensions`;
 			const descEl = this.apiKeySetting.descEl;
 			
 			// 清空现有描述

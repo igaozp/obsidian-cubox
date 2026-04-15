@@ -1,5 +1,5 @@
 import { addIcon, Notice, Plugin, TFile, TFolder } from 'obsidian';
-import { CuboxApi } from './cuboxApi';
+import { CuboxApi, CuboxApiKeyMissingError } from './cuboxApi';
 import { TemplateProcessor } from './templateProcessor';
 import { formatDateTime } from './utils';
 import { CuboxSyncSettingTab, CuboxSyncSettings, DEFAULT_SETTINGS } from './cuboxSetting';
@@ -211,6 +211,10 @@ export default class CuboxSyncPlugin extends Plugin {
 			new Notice(message);
 		} catch (error) {
 			console.error('同步 Cubox 数据失败:', error);
+			if (error instanceof CuboxApiKeyMissingError) {
+				new Notice('Cubox API Key not found. Please set your API Key in plugin settings and try again.');
+				return;
+			}
 			new Notice('Cubox sync failed. Please check settings or network.');
 		} finally {
 			this.settings.syncing = false;

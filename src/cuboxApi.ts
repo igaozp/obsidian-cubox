@@ -51,6 +51,13 @@ interface ListResponse {
     data: CuboxArticle[];
 }
 
+export class CuboxApiKeyMissingError extends Error {
+    constructor(message = 'Cubox API key is missing or invalid.') {
+        super(message);
+        this.name = 'CuboxApiKeyMissingError';
+    }
+}
+
 interface ContentResponse {
     code: number;
     message: string;
@@ -183,6 +190,10 @@ export class CuboxApi {
                 method: 'POST',
                 body: JSON.stringify(requestBody)
             }) as ListResponse;
+
+            if (response.code === -1100) {
+                throw new CuboxApiKeyMissingError(response.message || 'API key not found');
+            }
             
             const articles = response.data ?? [];
             const hasMore = articles && articles.length >= pageSize;
